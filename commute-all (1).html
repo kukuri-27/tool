@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>通勤コスト比較表（全手段）</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fff5f7;
+    --surface: #ffffff;
+    --surface2: #fce8ef;
+    --border: #f0b8cc;
+    --text: #4a2a35;
+    --muted: #b07a8a;
+    --accent: #e8547a;
+    --accent2: #c0392b;
+    --green: #2ecc71;
+    --blue: #8e6bbf;
+    --font-body: 'Zen Maru Gothic', 'Noto Sans JP', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* 花柄背景SVG */
+  body {
+    background-color: var(--bg);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cg opacity='0.13'%3E%3Ccircle cx='20' cy='20' r='5' fill='%23e8547a'/%3E%3Ccircle cx='20' cy='12' r='3' fill='%23e8547a'/%3E%3Ccircle cx='20' cy='28' r='3' fill='%23e8547a'/%3E%3Ccircle cx='13' cy='16' r='3' fill='%23e8547a'/%3E%3Ccircle cx='27' cy='16' r='3' fill='%23e8547a'/%3E%3Ccircle cx='13' cy='24' r='3' fill='%23e8547a'/%3E%3Ccircle cx='27' cy='24' r='3' fill='%23e8547a'/%3E%3Ccircle cx='20' cy='20' r='2.5' fill='%23ffb6c1'/%3E%3Ccircle cx='70' cy='60' r='4' fill='%23f4a7b9'/%3E%3Ccircle cx='70' cy='53' r='2.5' fill='%23f4a7b9'/%3E%3Ccircle cx='70' cy='67' r='2.5' fill='%23f4a7b9'/%3E%3Ccircle cx='64' cy='56' r='2.5' fill='%23f4a7b9'/%3E%3Ccircle cx='76' cy='56' r='2.5' fill='%23f4a7b9'/%3E%3Ccircle cx='64' cy='63' r='2.5' fill='%23f4a7b9'/%3E%3Ccircle cx='76' cy='63' r='2.5' fill='%23f4a7b9'/%3E%3Ccircle cx='70' cy='60' r='2' fill='%23fff0f3'/%3E%3Ccircle cx='100' cy='15' r='3' fill='%23d4a5c9'/%3E%3Ccircle cx='100' cy='9' r='2' fill='%23d4a5c9'/%3E%3Ccircle cx='100' cy='21' r='2' fill='%23d4a5c9'/%3E%3Ccircle cx='95' cy='12' r='2' fill='%23d4a5c9'/%3E%3Ccircle cx='105' cy='12' r='2' fill='%23d4a5c9'/%3E%3Ccircle cx='95' cy='18' r='2' fill='%23d4a5c9'/%3E%3Ccircle cx='105' cy='18' r='2' fill='%23d4a5c9'/%3E%3Ccircle cx='100' cy='15' r='1.5' fill='%23fff0f3'/%3E%3Ccircle cx='40' cy='95' r='3.5' fill='%23e8547a'/%3E%3Ccircle cx='40' cy='89' r='2.2' fill='%23e8547a'/%3E%3Ccircle cx='40' cy='101' r='2.2' fill='%23e8547a'/%3E%3Ccircle cx='34' cy='92' r='2.2' fill='%23e8547a'/%3E%3Ccircle cx='46' cy='92' r='2.2' fill='%23e8547a'/%3E%3Ccircle cx='34' cy='98' r='2.2' fill='%23e8547a'/%3E%3Ccircle cx='46' cy='98' r='2.2' fill='%23e8547a'/%3E%3Ccircle cx='40' cy='95' r='2' fill='%23ffb6c1'/%3E%3C/g%3E%3C/svg%3E");
+    color: var(--text);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    padding: 24px 16px 60px;
+  }
+
+  header {
+    margin-bottom: 28px;
+    padding: 20px 20px 20px 24px;
+    background: linear-gradient(135deg, #fff0f4, #fce8ef);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    position: relative;
+    overflow: hidden;
+  }
+  header::after {
+    content: "🌸";
+    position: absolute;
+    right: 16px; top: 50%;
+    transform: translateY(-50%);
+    font-size: 2.5rem;
+    opacity: 0.4;
+  }
+  header h1 { font-size: 1.4rem; font-weight: 700; color: var(--accent); }
+  header p  { font-size: 0.78rem; color: var(--muted); margin-top: 4px; }
+
+  /* 手段タブ */
+  .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+  .tab {
+    padding: 8px 18px; border-radius: 20px;
+    border: 1.5px solid var(--border);
+    background: var(--surface); color: var(--muted);
+    font-size: 0.82rem; cursor: pointer; font-family: var(--font-body);
+    transition: all 0.15s;
+  }
+  .tab:hover { border-color: var(--accent); color: var(--accent); }
+  .tab.active { background: linear-gradient(135deg, #e8547a, #f07aaa); color: #fff; border-color: var(--accent); font-weight: 700; box-shadow: 0 2px 8px rgba(232,84,122,0.3); }
+
+  .controls {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 24px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    box-shadow: 0 2px 12px rgba(232,84,122,0.07);
+  }
+  .control-group { display: flex; flex-direction: column; gap: 6px; }
+  .control-group.full { grid-column: 1 / -1; }
+  label { font-size: 0.72rem; color: var(--muted); letter-spacing: 0.06em; }
+  input[type=range] {
+    -webkit-appearance: none;
+    width: 100%; height: 5px;
+    background: linear-gradient(to right, #f0b8cc, #fce8ef);
+    border-radius: 3px; outline: none;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: linear-gradient(135deg, #e8547a, #f07aaa);
+    cursor: pointer; border: 2px solid #fff;
+    box-shadow: 0 1px 4px rgba(232,84,122,0.4);
+  }
+  .val-display { font-family: var(--font-mono); font-size: 1.05rem; color: var(--accent); font-weight: 500; }
+  input[type=range]:disabled { opacity: 0.3; cursor: not-allowed; }
+  input[type=range]:disabled::-webkit-slider-thumb { cursor: not-allowed; background: var(--muted); }
+  select {
+    background: #fff8fa; color: var(--text);
+    border: 1.5px solid var(--border); border-radius: 8px;
+    padding: 7px 10px; font-size: 0.85rem; font-family: var(--font-body);
+    width: 100%; cursor: pointer; outline: none;
+  }
+  .min-wage-tag { font-size: 0.7rem; color: var(--accent); margin-top: 2px; }
+
+  .mode-options {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    display: none;
+    gap: 16px;
+    grid-template-columns: 1fr 1fr;
+    box-shadow: 0 2px 12px rgba(232,84,122,0.07);
+  }
+  .mode-options.visible { display: grid; }
+
+  .section-title {
+    font-size: 0.72rem; letter-spacing: 0.1em;
+    color: var(--muted); margin-bottom: 12px; padding-bottom: 8px;
+    border-bottom: 1.5px solid var(--border);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .section-title::before { content: "🌷"; font-size: 0.9rem; }
+
+  .table-wrap {
+    overflow-x: auto; margin-bottom: 28px;
+    border-radius: 14px; border: 1px solid var(--border);
+    box-shadow: 0 2px 16px rgba(232,84,122,0.08);
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  thead tr { background: linear-gradient(135deg, #fce8ef, #fff0f4); }
+  th {
+    padding: 12px 14px; text-align: center;
+    font-size: 0.7rem; letter-spacing: 0.06em;
+    color: var(--muted); font-weight: 700; white-space: nowrap;
+  }
+  th:first-child { text-align: left; }
+  td {
+    padding: 12px 14px; text-align: center;
+    border-top: 1px solid #fce8ef;
+    font-family: var(--font-mono); font-size: 0.82rem; white-space: nowrap;
+    color: var(--text);
+  }
+  td:first-child { font-family: var(--font-body); text-align: left; font-size: 0.8rem; color: var(--text); }
+  tr:hover { background: #fff8fa; }
+  tr.highlight { background: rgba(232,84,122,0.05); }
+  tr.highlight td:first-child::after {
+    content: " ←基準"; font-size: 0.65rem; color: var(--accent); margin-left: 4px;
+  }
+  .tag-good { color: #27ae60; font-weight: 600; }
+  .tag-bad  { color: #c0392b; font-weight: 600; }
+  .tag-mid  { color: #8e44ad; font-weight: 600; }
+  .stress-bar { display: inline-flex; gap: 2px; align-items: center; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: #f0b8cc; }
+  .dot.on { background: #e8547a; }
+
+  .cards {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 12px; margin-bottom: 28px;
+  }
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 16px;
+    box-shadow: 0 2px 10px rgba(232,84,122,0.06);
+  }
+  .card-label { font-size: 0.68rem; color: var(--muted); letter-spacing: 0.06em; margin-bottom: 6px; line-height: 1.5; }
+  .card-val   { font-family: var(--font-mono); font-size: 1.3rem; font-weight: 500; }
+  .card-sub   { font-size: 0.68rem; color: var(--muted); margin-top: 4px; }
+  .card.positive { border-color: rgba(46,204,113,0.4); background: #f0fff6; }
+  .card.negative { border-color: rgba(232,84,122,0.3); background: #fff5f7; }
+
+  .insight {
+    background: linear-gradient(135deg, #fff5f7, #fff0f4);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: 14px;
+    padding: 16px; font-size: 0.82rem; line-height: 1.9;
+    color: var(--text); margin-bottom: 12px;
+  }
+  .insight strong { color: var(--accent); font-weight: 700; }
+  .note { font-size: 0.68rem; color: var(--muted); line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>通勤コスト 比較表</h1>
+  <p>交通費支給あり ／ 通勤手段別 ／ 2025年度最低賃金対応</p>
+</header>
+
+<!-- 手段タブ -->
+<div class="tabs">
+  <button class="tab active" data-mode="car">🚗 車・バイク</button>
+  <button class="tab" data-mode="train">🚃 電車・バス</button>
+  <button class="tab" data-mode="bike">🚲 自転車・徒歩</button>
+</div>
+
+<!-- 共通コントロール -->
+<div class="controls">
+  <div class="control-group full">
+    <label>都道府県（最低賃金を自動設定）</label>
+    <select id="pref"><option value="">-- 選択してください --</option></select>
+    <span class="min-wage-tag" id="min-wage-tag"></span>
+  </div>
+  <div class="control-group">
+    <label>時給</label>
+    <input type="range" id="wage" min="1000" max="2500" step="1" value="1600" disabled>
+    <span class="val-display" id="wage-val">1,600 円/h</span>
+  </div>
+  <div class="control-group">
+    <label>1日の労働時間</label>
+    <input type="range" id="hours" min="4" max="10" step="0.5" value="8">
+    <span class="val-display" id="hours-val">8.0 時間</span>
+  </div>
+  <div class="control-group">
+    <label>月の出勤日数</label>
+    <input type="range" id="days" min="10" max="25" step="1" value="20">
+    <span class="val-display" id="days-val">20 日</span>
+  </div>
+</div>
+
+<!-- 手段別オプション：電車のみ表示 -->
+<div class="mode-options" id="train-options">
+  <div class="control-group">
+    <label>定期代（月額・自己負担分）</label>
+    <input type="range" id="teiki" min="0" max="30000" step="500" value="0">
+    <span class="val-display" id="teiki-val">0 円</span>
+  </div>
+  <div class="control-group" style="justify-content:flex-end;">
+    <label style="margin-bottom:8px;">乗り換え回数</label>
+    <select id="transfer">
+      <option value="0">なし（直通）</option>
+      <option value="1">1回</option>
+      <option value="2">2回以上</option>
+    </select>
+  </div>
+</div>
+
+<p class="section-title">シナリオ別 比較</p>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr id="table-head"></tr>
+    </thead>
+    <tbody id="table-body"></tbody>
+  </table>
+</div>
+
+<div class="cards" id="cards"></div>
+<div class="insight" id="insight"></div>
+<p class="note" id="note-text"></p>
+
+<script>
+  // 都道府県データ
+  const prefData = [
+    {name:"北海道", min:1075}, {name:"青森県", min:1029}, {name:"岩手県", min:1031},
+    {name:"宮城県", min:1038}, {name:"秋田県", min:1031}, {name:"山形県", min:1032},
+    {name:"福島県", min:1033}, {name:"茨城県", min:1074}, {name:"栃木県", min:1068},
+    {name:"群馬県", min:1063}, {name:"埼玉県", min:1141}, {name:"千葉県", min:1140},
+    {name:"東京都", min:1226}, {name:"神奈川県", min:1225}, {name:"新潟県", min:1050},
+    {name:"富山県", min:1062}, {name:"石川県", min:1054}, {name:"福井県", min:1053},
+    {name:"山梨県", min:1052}, {name:"長野県", min:1061}, {name:"岐阜県", min:1065},
+    {name:"静岡県", min:1097}, {name:"愛知県", min:1140}, {name:"三重県", min:1087},
+    {name:"滋賀県", min:1080}, {name:"京都府", min:1122}, {name:"大阪府", min:1177},
+    {name:"兵庫県", min:1116}, {name:"奈良県", min:1051}, {name:"和歌山県", min:1045},
+    {name:"鳥取県", min:1030}, {name:"島根県", min:1033}, {name:"岡山県", min:1047},
+    {name:"広島県", min:1085}, {name:"山口県", min:1043}, {name:"徳島県", min:1046},
+    {name:"香川県", min:1036}, {name:"愛媛県", min:1033}, {name:"高知県", min:1023},
+    {name:"福岡県", min:1057}, {name:"佐賀県", min:1030}, {name:"長崎県", min:1031},
+    {name:"熊本県", min:1034}, {name:"大分県", min:1035}, {name:"宮崎県", min:1023},
+    {name:"鹿児島県", min:1026}, {name:"沖縄県", min:1023}
+  ];
+
+  // シナリオ定義（手段別）
+  const modeData = {
+    car: {
+      label: '車・バイク',
+      scenarios: [
+        { label: "徒歩圏 〜2km",   min: 5,  stress: 1 },
+        { label: "近場 5km",       min: 12, stress: 1 },
+        { label: "普通 10km",      min: 20, stress: 2 },
+        { label: "やや遠 20km",    min: 35, stress: 3 },
+        { label: "遠め 30km",      min: 45, stress: 4 },
+        { label: "かなり遠 50km",  min: 70, stress: 5 },
+      ],
+      note: '※ 燃料費・駐車場代・高速代は含まず（交通費支給を想定）。通勤時間はおおよその目安です。',
+      baseIdx: 1,
+      farIdx: 4,
+    },
+    train: {
+      label: '電車・バス',
+      scenarios: [
+        { label: "近距離 〜5分",    min: 8,  stress: 1 },
+        { label: "10〜15分",       min: 15, stress: 1 },
+        { label: "20〜30分",       min: 28, stress: 2 },
+        { label: "40〜50分",       min: 48, stress: 3 },
+        { label: "1時間前後",      min: 65, stress: 4 },
+        { label: "1時間30分以上",  min: 95, stress: 5 },
+      ],
+      note: '※ 定期代は自己負担分のみ入力してください。乗り換えによる待ち時間（1回あたり約5分）を加算しています。',
+      baseIdx: 1,
+      farIdx: 4,
+    },
+    bike: {
+      label: '自転車・徒歩',
+      scenarios: [
+        { label: "徒歩 〜5分",     min: 5,  stress: 1 },
+        { label: "徒歩 15分",      min: 15, stress: 1 },
+        { label: "自転車 10分",    min: 10, stress: 1 },
+        { label: "自転車 20分",    min: 20, stress: 2 },
+        { label: "自転車 30分",    min: 30, stress: 3 },
+        { label: "自転車 45分以上",min: 45, stress: 4 },
+      ],
+      note: '※ 自転車・徒歩は交通費が発生しないため、純粋な時間コストのみの比較です。雨天時の代替手段も考慮してください。',
+      baseIdx: 2,
+      farIdx: 4,
+    },
+  };
+
+  let currentMode = 'car';
+
+  function fmt(n, d=0) {
+    return Math.round(n).toLocaleString('ja-JP', {minimumFractionDigits:d, maximumFractionDigits:d});
+  }
+  function stressBar(level) {
+    let h = '<span class="stress-bar">';
+    for(let i=1;i<=5;i++) h += `<span class="dot ${i<=level?'on':''}"></span>`;
+    return h + '</span>';
+  }
+  const stressLabel = ['','低','低め','中','高め','高'];
+
+  // 都道府県セレクト
+  const sel = document.getElementById('pref');
+  prefData.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.min;
+    opt.textContent = p.name + '  （' + p.min + '円）';
+    sel.appendChild(opt);
+  });
+  sel.addEventListener('change', () => {
+    const wageSlider = document.getElementById('wage');
+    const minWage = parseInt(sel.value);
+    if (!minWage) {
+      wageSlider.disabled = true;
+      wageSlider.min = 1000;
+      document.getElementById('min-wage-tag').textContent = '';
+      update();
+      return;
+    }
+    wageSlider.disabled = false;
+    wageSlider.min = minWage;
+    if (parseInt(wageSlider.value) < minWage) wageSlider.value = minWage;
+    document.getElementById('min-wage-tag').textContent = '最低賃金: ' + minWage.toLocaleString() + '円 ／ スライダー下限を設定しました';
+    update();
+  });
+
+  // タブ切り替え
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      currentMode = tab.dataset.mode;
+      // 電車オプション表示切替
+      document.getElementById('train-options').classList.toggle('visible', currentMode === 'train');
+      update();
+    });
+  });
+
+  function getTransferExtra() {
+    if (currentMode !== 'train') return 0;
+    return parseInt(document.getElementById('transfer').value) * 5;
+  }
+
+  function update() {
+    const wage  = +document.getElementById('wage').value;
+    const workH = +document.getElementById('hours').value;
+    const days  = +document.getElementById('days').value;
+    const teiki = currentMode === 'train' ? +document.getElementById('teiki').value : 0;
+    const transferExtra = getTransferExtra();
+
+    document.getElementById('wage-val').textContent  = `${wage.toLocaleString()} 円/h`;
+    document.getElementById('hours-val').textContent = `${workH.toFixed(1)} 時間`;
+    document.getElementById('days-val').textContent  = `${days} 日`;
+    if (currentMode === 'train') {
+      document.getElementById('teiki-val').textContent = teiki.toLocaleString() + ' 円';
+    }
+
+    const mode = modeData[currentMode];
+    const baseMonthly = wage * workH * days;
+
+    // ヘッダー
+    const showCost = currentMode === 'train' && teiki > 0;
+    document.getElementById('table-head').innerHTML = `
+      <th>区間・距離</th>
+      <th>通勤時間<br>(片道)</th>
+      <th>1日の<br>拘束時間</th>
+      <th>実質時給<br>(通勤込み)</th>
+      <th>月収入</th>
+      ${showCost ? '<th>月定期代<br>(自己負担)</th><th>月実収</th>' : '<th>月の通勤<br>時間ロス</th>'}
+      <th>ストレス</th>
+    `;
+
+    let tbody = '', results = [];
+
+    mode.scenarios.forEach((s, i) => {
+      const actualMin  = s.min + transferExtra;
+      const commuteH   = (actualMin * 2) / 60;
+      const totalH     = workH + commuteH;
+      const effWage    = wage * workH / totalH;
+      const monthLoss  = commuteH * days;
+      const netMonthly = baseMonthly - teiki;
+      results.push({ effWage, monthLoss, commuteH, totalH, netMonthly });
+
+      const isBase = i === mode.baseIdx;
+      const wClass = effWage >= wage * 0.92 ? 'tag-good' : effWage >= wage * 0.80 ? 'tag-mid' : 'tag-bad';
+      const tClass = totalH > workH + 1 ? 'tag-bad' : '';
+      const lClass = monthLoss > 10 ? 'tag-bad' : monthLoss > 5 ? 'tag-mid' : '';
+
+      const costCells = showCost
+        ? `<td class="tag-bad">−${fmt(teiki)} 円</td><td class="${netMonthly < baseMonthly * 0.95 ? 'tag-bad' : ''}">${fmt(netMonthly)} 円</td>`
+        : `<td class="${lClass}">${fmt(monthLoss,1)} h</td>`;
+
+      tbody += `<tr ${isBase ? 'class="highlight"' : ''}>
+        <td>${s.label}</td>
+        <td>${actualMin} 分</td>
+        <td class="${tClass}">${totalH.toFixed(1)} h</td>
+        <td class="${wClass}">${fmt(effWage)} 円</td>
+        <td>${fmt(baseMonthly)} 円</td>
+        ${costCells}
+        <td>${stressBar(s.stress)} ${stressLabel[s.stress]}</td>
+      </tr>`;
+    });
+
+    document.getElementById('table-body').innerHTML = tbody;
+
+    // カード
+    const near = results[mode.baseIdx];
+    const far  = results[mode.farIdx];
+    const wageDiff = near.effWage - far.effWage;
+    const timeDiff = far.monthLoss - near.monthLoss;
+    const oppCost  = timeDiff * wage;
+
+    document.getElementById('cards').innerHTML = `
+      <div class="card positive">
+        <div class="card-label">実質時給の差<br>(近 vs 遠)</div>
+        <div class="card-val tag-good">+${fmt(wageDiff)} 円/h</div>
+        <div class="card-sub">近い方が実質的に高時給</div>
+      </div>
+      <div class="card negative">
+        <div class="card-label">月の通勤時間ロス<br>(近→遠 に増えると)</div>
+        <div class="card-val tag-bad">+${fmt(timeDiff,1)} 時間</div>
+        <div class="card-sub">月${days}日出勤の場合</div>
+      </div>
+      <div class="card negative">
+        <div class="card-label">その時間の機会費用<br>(同じ時給で換算)</div>
+        <div class="card-val tag-bad">${fmt(oppCost)} 円</div>
+        <div class="card-sub">働けたはずの金額</div>
+      </div>
+      <div class="card">
+        <div class="card-label">遠距離通勤の<br>月間拘束時間</div>
+        <div class="card-val tag-mid">${fmt(far.totalH * days,1)} h</div>
+        <div class="card-sub">労働＋通勤の合計</div>
+      </div>
+    `;
+
+    document.getElementById('insight').innerHTML = `
+      <strong>💡 まとめ（${mode.label}）</strong><br>
+      時給 ${wage.toLocaleString()}円・月${days}日出勤の場合、<br>
+      近い職場 → 実質時給 <strong>${fmt(near.effWage)}円</strong>、月の通勤ロス <strong>${fmt(near.monthLoss,1)}時間</strong><br>
+      遠い職場 → 実質時給 <strong>${fmt(far.effWage)}円</strong>、月の通勤ロス <strong>${fmt(far.monthLoss,1)}時間</strong><br><br>
+      交通費が支給されても、<strong>「時間」というコストは取り返せません。</strong>
+      通勤で失う月 <strong>${fmt(timeDiff,1)}時間</strong> は、同じ時給なら <strong>${fmt(oppCost)}円分</strong> の価値があります。
+    `;
+
+    document.getElementById('note-text').textContent = mode.note;
+  }
+
+  ['wage','hours','days','teiki','transfer'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', update);
+    if (el) el.addEventListener('change', update);
+  });
+
+  update();
+</script>
+</body>
+</html>
